@@ -10,5 +10,8 @@
   },
   "keywords": [],
   "author": "Md. Shamim Sarker",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
