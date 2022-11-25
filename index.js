@@ -32,6 +32,47 @@ async function run() {
             console.log('Data added successfully...');
         });
 
+        app.get("/users", async (req, res) => {
+            const query = {};
+            const result = await usersCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = {email: email};
+            const user = await usersCollection.find(query).toArray();
+            res.send(user);
+        });
+
+        app.get('/users/role/:role', async (req, res) => {
+            const userRole = req.params.role;
+            const query = {role: userRole};
+            const result = await usersCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        app.put('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            };
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = {_id: ObjectId(id)};
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
+        });
+
         app.post("/products", async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
@@ -64,23 +105,17 @@ async function run() {
             res.send(products);
         });
 
-        app.get("/products", async (req, res) => {
-            const query = {};
+        app.get("/products/report/:report", async (req, res) => {
+            const report = Boolean(req.params.report);
+            const query = {reportToAdmin: report};
             const result = await productsCollection.find(query).toArray();
             res.send(result);
         });
 
-        app.get("/users", async (req, res) => {
+        app.get("/products", async (req, res) => {
             const query = {};
-            const result = await usersCollection.find(query).toArray();
+            const result = await productsCollection.find(query).toArray();
             res.send(result);
-        });
-
-        app.get('/users/:email', async (req, res) => {
-            const email = req.params.email;
-            const query = {email: email};
-            const user = await usersCollection.find(query).toArray();
-            res.send(user);
         });
 
         app.get("/categories", async (req, res) => {
