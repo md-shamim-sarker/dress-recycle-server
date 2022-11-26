@@ -32,33 +32,79 @@ async function run() {
             console.log('Data added successfully...');
         });
 
-        app.get("/users", async (req, res) => {
-            const query = {};
-            const result = await usersCollection.find(query).toArray();
-            res.send(result);
-        });
-
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = {email: email};
-            const user = await usersCollection.find(query).toArray();
-            res.send(user);
+            const result = await usersCollection.findOne(query);
+            res.send(result);
         });
 
-        app.get('/users/role/:role', async (req, res) => {
-            const userRole = req.params.role;
-            const query = {role: userRole};
+        // app.get('/users/role/:role', async (req, res) => {
+        //     const userRole = req.params.role;
+        //     const query = {role: userRole};
+        //     const result = await usersCollection.find(query).toArray();
+        //     res.send(result);
+        // });
+
+        app.get('/users/role2/seller', async (req, res) => {
+            const query = {
+                role: 'seller',
+                isAdmin: false
+            };
             const result = await usersCollection.find(query).toArray();
             res.send(result);
         });
 
-        app.put('/users/:id', async (req, res) => {
+        app.get('/users/role2/buyer', async (req, res) => {
+            const query = {
+                role: 'buyer',
+                isAdmin: false
+            };
+            const result = await usersCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        app.get('/users/role2/admin', async (req, res) => {
+            const query = {
+                isAdmin: true
+            };
+            const result = await usersCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        app.put('/users/makeAdmin/:id', async (req, res) => {
             const id = req.params.id;
             const filter = {_id: ObjectId(id)};
             const options = {upsert: true};
             const updatedDoc = {
                 $set: {
-                    role: 'admin'
+                    isAdmin: true
+                }
+            };
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        app.put('/users/cancelAdmin/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set: {
+                    isAdmin: false
+                }
+            };
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        app.put('/users/seller/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set: {
+                    isVerified: true
                 }
             };
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
@@ -118,6 +164,15 @@ async function run() {
             res.send(result);
         });
 
+        app.get("/products/all/advertise", async (req, res) => {
+            const query = {
+                soldOut: false,
+                advertise: true
+            };
+            const result = await productsCollection.find(query).toArray();
+            res.send(result);
+        });
+
         app.get("/categories", async (req, res) => {
             const query = {};
             const result = await categoriesCollection.find(query).toArray();
@@ -138,6 +193,19 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     reportToAdmin: true
+                }
+            };
+            const result = await productsCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        app.put('/products/advertise2/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set: {
+                    advertise: true
                 }
             };
             const result = await productsCollection.updateOne(filter, updatedDoc, options);
