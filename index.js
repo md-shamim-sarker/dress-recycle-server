@@ -25,6 +25,13 @@ async function run() {
         const wishListsCollection = client.db('dressRecycle').collection('wishLists');
         const ordersCollection = client.db('dressRecycle').collection('orders');
 
+        app.post("/orders", async (req, res) => {
+            const order = req.body;
+            console.log(order);
+            const result = await ordersCollection.insertOne(order);
+            res.send(result);
+        });
+
         app.post("/users", async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
@@ -128,12 +135,6 @@ async function run() {
         app.post("/wishLists", async (req, res) => {
             const wishList = req.body;
             const result = await wishListsCollection.insertOne(wishList);
-            res.send(result);
-        });
-
-        app.post("/orders", async (req, res) => {
-            const order = req.body;
-            const result = await ordersCollection.insertOne(order);
             res.send(result);
         });
 
