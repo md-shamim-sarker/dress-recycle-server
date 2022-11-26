@@ -182,8 +182,40 @@ async function run() {
         app.get("/categories/:id", async (req, res) => {
             const id = req.params.id;
             const query = {categoryId: id};
-            const user = await productsCollection.find(query).toArray();
-            res.send(user);
+            const result = await productsCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        app.get("/products/id/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await productsCollection.findOne(query);
+            res.send(result);
+        });
+
+        // U from CRUD
+        app.put('/products/update/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const product = req.body;
+            console.log(product);
+            const option = {upsert: true};
+            const updatedDoc = {
+                $set: {
+                    category: product.category,
+                    condition: product.condition,
+                    description: product.description,
+                    image: product.image,
+                    location: product.location,
+                    originalPrice: product.originalPrice,
+                    productName: product.productName,
+                    resalePrice: product.resalePrice,
+                    yearsOfUse: product.yearsOfUse,
+                    date: product.date
+                }
+            };
+            const result = await productsCollection.updateOne(filter, updatedDoc, option);
+            res.send(result);
         });
 
         app.put('/products/:id', async (req, res) => {
