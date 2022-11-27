@@ -32,6 +32,14 @@ async function run() {
             res.send(result);
         });
 
+        app.delete('/wishLists/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = {_id: ObjectId(id)};
+            const result = await wishListsCollection.deleteOne(query);
+            res.send(result);
+        });
+
         app.post("/users", async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
@@ -134,8 +142,9 @@ async function run() {
 
         app.post("/wishLists", async (req, res) => {
             const wishList = req.body;
-            const result = await wishListsCollection.insertOne(wishList);
-            res.send(result);
+            console.log(wishList);
+            /* const result = await wishListsCollection.insertOne(wishList);
+            res.send(result); */
         });
 
         app.get("/wishLists/:email", async (req, res) => {
