@@ -1,13 +1,30 @@
 const express = require('express');
-const {MongoClient, ServerApiVersion, ObjectId} = require('mongodb');
+const {MongoClient, ObjectId} = require('mongodb');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
+// middleware
 app.use(cors());
 app.use(express.json());
+
+/* function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if(!authHeader) {
+        return res.status(401).send({message: 'Unauthorized Access'});
+    }
+    const token = authHeader;
+    jwt.verify(token, process.env.ACCESS_TOKEN, function(err, decoded) {
+        if(err) {
+            return res.status(401).send({message: 'Unauthorized Access'});
+        }
+        req.decoded = decoded;
+        next();
+    });
+} */
 
 // Atlas
 /* const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.egsefuu.mongodb.net/?retryWrites=true&w=majority`;
@@ -24,6 +41,34 @@ async function run() {
         const productsCollection = client.db('dressRecycle').collection('products');
         const wishListsCollection = client.db('dressRecycle').collection('wishLists');
         const ordersCollection = client.db('dressRecycle').collection('orders');
+        const paymentsCollection = client.db('dressRecycle').collection('payment');
+
+        // JWT
+        app.post("/jwt", (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+                expiresIn: '5h'
+            });
+            res.send({token});
+        });
+
+        app.get("/products/:email", async (req, res) => {
+            const email = req.params.email;
+            /* const decoded = req.decoded;
+            if(decoded.email !== email) {
+                res.status(401).send({message: 'Unauthorized Access'});
+            } */
+            const query = {sellerEmail: email};
+            const products = await productsCollection.find(query).toArray();
+            res.send(products);
+        });
+
+        app.get("/products2/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await productsCollection.findOne(query);
+            res.send(result);
+        });
 
         app.post("/orders", async (req, res) => {
             const order = req.body;
@@ -31,8 +76,25 @@ async function run() {
             res.send(result);
         });
 
+        app.post("/payments", async (req, res) => {
+            const payment = req.body;
+            const result = await paymentsCollection.insertOne(payment);
+            res.send(result);
+        });
+
+        app.get("/orders/id/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = {productId: id};
+            const results = await ordersCollection.findOne(query);
+            res.send(results);
+        });
+
         app.get("/orders/:email", async (req, res) => {
             const email = req.params.email;
+            /*  const decoded = req.decoded;
+             if(decoded.email !== email) {
+                 res.status(401).send({message: 'Unauthorized Access'});
+             } */
             const query = {userEmail: email};
             const result = await ordersCollection.find(query).toArray();
             res.send(result);
@@ -60,8 +122,23 @@ async function run() {
 
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
+            /* const decoded = req.decoded;
+            if(decoded.email !== email) {
+                res.status(401).send({message: 'Unauthorized Access'});
+            } */
             const query = {email: email};
             const result = await usersCollection.findOne(query);
+            res.send(result);
+        });
+
+        app.get('/users2/:email', async (req, res) => {
+            const email = req.params.email;
+            /* const decoded = req.decoded;
+            if(decoded.email !== email) {
+                res.status(401).send({message: 'Unauthorized Access'});
+            } */
+            const query = {email: email};
+            const result = await usersCollection.find(query).toArray();
             res.send(result);
         });
 
@@ -150,8 +227,6 @@ async function run() {
             res.send(result);
         });
 
-
-
         app.post("/products", async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
@@ -166,16 +241,13 @@ async function run() {
 
         app.get("/wishLists/:email", async (req, res) => {
             const email = req.params.email;
+            /* const decoded = req.decoded;
+            if(decoded.email !== email) {
+                res.status(401).send({message: 'Unauthorized Access'});
+            } */
             const query = {userEmail: email};
             const wishLists = await wishListsCollection.find(query).toArray();
             res.send(wishLists);
-        });
-
-        app.get("/products/:email", async (req, res) => {
-            const email = req.params.email;
-            const query = {sellerEmail: email};
-            const products = await productsCollection.find(query).toArray();
-            res.send(products);
         });
 
         app.delete('/products/:id', async (req, res) => {
@@ -303,6 +375,33 @@ async function run() {
             const options = {upsert: true};
             const updatedDoc = {
                 $set: {
+                    advertise: false
+                }
+            };
+            const result = await productsCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        app.put('/products/soldOut/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set: {
+                    soldOut: true
+                }
+            };
+            const result = await productsCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        app.put('/products/unSoldOut/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set: {
+                    soldOut: false,
                     advertise: false
                 }
             };
