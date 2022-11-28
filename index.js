@@ -11,7 +11,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-/* function verifyJWT(req, res, next) {
+function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
     if(!authHeader) {
         return res.status(401).send({message: 'Unauthorized Access'});
@@ -24,17 +24,10 @@ app.use(express.json());
         req.decoded = decoded;
         next();
     });
-} */
+}
 
-// Atlas
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.egsefuu.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1});
-
-
-
-// Local
-/* const uri = 'mongodb://localhost:27017';
-const client = new MongoClient(uri); */
 
 async function run() {
     try {
@@ -54,12 +47,13 @@ async function run() {
             res.send({token});
         });
 
-        app.get("/products/:email", async (req, res) => {
+        app.get("/products/:email", verifyJWT, async (req, res) => {
             const email = req.params.email;
-            /* const decoded = req.decoded;
+
+            const decoded = req.decoded;
             if(decoded.email !== email) {
                 res.status(401).send({message: 'Unauthorized Access'});
-            } */
+            }
             const query = {sellerEmail: email};
             const products = await productsCollection.find(query).toArray();
             res.send(products);
@@ -91,12 +85,12 @@ async function run() {
             res.send(results);
         });
 
-        app.get("/orders/:email", async (req, res) => {
+        app.get("/orders/:email", verifyJWT, async (req, res) => {
             const email = req.params.email;
-            /*  const decoded = req.decoded;
-             if(decoded.email !== email) {
-                 res.status(401).send({message: 'Unauthorized Access'});
-             } */
+            const decoded = req.decoded;
+            if(decoded.email !== email) {
+                res.status(401).send({message: 'Unauthorized Access'});
+            }
             const query = {userEmail: email};
             const result = await ordersCollection.find(query).toArray();
             res.send(result);
@@ -122,12 +116,8 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/users/:email', async (req, res) => {
+        app.get('/users/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
-            /* const decoded = req.decoded;
-            if(decoded.email !== email) {
-                res.status(401).send({message: 'Unauthorized Access'});
-            } */
             const query = {email: email};
             const result = await usersCollection.findOne(query);
             res.send(result);
@@ -135,10 +125,6 @@ async function run() {
 
         app.get('/users2/:email', async (req, res) => {
             const email = req.params.email;
-            /* const decoded = req.decoded;
-            if(decoded.email !== email) {
-                res.status(401).send({message: 'Unauthorized Access'});
-            } */
             const query = {email: email};
             const result = await usersCollection.find(query).toArray();
             res.send(result);
@@ -241,12 +227,12 @@ async function run() {
             res.send(result);
         });
 
-        app.get("/wishLists/:email", async (req, res) => {
+        app.get("/wishLists/:email", verifyJWT, async (req, res) => {
             const email = req.params.email;
-            /* const decoded = req.decoded;
+            const decoded = req.decoded;
             if(decoded.email !== email) {
                 res.status(401).send({message: 'Unauthorized Access'});
-            } */
+            }
             const query = {userEmail: email};
             const wishLists = await wishListsCollection.find(query).toArray();
             res.send(wishLists);
@@ -308,7 +294,6 @@ async function run() {
             res.send(result);
         });
 
-        // U from CRUD
         app.put('/products/update/:id', async (req, res) => {
             const id = req.params.id;
             const filter = {_id: ObjectId(id)};
