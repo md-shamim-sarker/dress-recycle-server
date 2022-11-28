@@ -1,3 +1,9 @@
-# Dress Recycle Server Side
+# Project Name: DRESS RECYCLE
 
-https://github.com/programming-hero-web-course-4/b612-used-products-resale-server-side-md-shamim-sarker
+# Key features
+- Deploy in vercel
+- Use Environment variable
+- Use Express.js
+- Use MongoDB database
+- Use JWT token
+- Use CORS
