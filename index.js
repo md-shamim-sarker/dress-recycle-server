@@ -26,6 +26,9 @@ function verifyJWT(req, res, next) {
     });
 }
 
+// const uri = 'mongodb://localhost:27017';
+// const client = new MongoClient(uri);
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.egsefuu.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1});
 
@@ -36,7 +39,7 @@ async function run() {
         const productsCollection = client.db('dressRecycle').collection('products');
         const wishListsCollection = client.db('dressRecycle').collection('wishLists');
         const ordersCollection = client.db('dressRecycle').collection('orders');
-        const paymentsCollection = client.db('dressRecycle').collection('payment');
+        const paymentsCollection = client.db('dressRecycle').collection('payments');
 
         // JWT
         app.post("/jwt", (req, res) => {
